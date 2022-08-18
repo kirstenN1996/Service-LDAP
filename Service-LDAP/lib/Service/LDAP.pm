@@ -22,7 +22,7 @@ use DBI;
 use Unicode::Map8;
 use Unicode::String qw(utf16);
 
-$VERSION = '2.01';
+$VERSION = '2.02';
 
 sub new
 {
@@ -35,18 +35,18 @@ sub new
         croak("Service::LDAP Failed to initialise. No Host [host] Specified") unless $param->{host};
 	
 	
-	my $redis = $param->{redis};
-	my $dbh   = $param->{dbh},
+		my $redis = $param->{redis};
+		my $dbh   = $param->{dbh},
 	
 
         #my $ldap = Net::LDAP->new($param->{host}) || die $@;
         my $ldap = Net::LDAPS->new($param->{host}, port => 636) || die $@;
-	my $msg = $ldap->bind($param->{bind_account}, password => $param->{bind_password});
+		my $msg = $ldap->bind($param->{bind_account}, password => $param->{bind_password});
         if($msg->error  ne "Success"){
                 croak "LDAP Bind  Failed. Could not bind to service. ".$msg->error;
         };
 
-	#my $core = Service::LDAP::Core->new({ldap=>$ldap, base=>$param->{base_dn} });
+		#my $core = Service::LDAP::Core->new({ldap=>$ldap, base=>$param->{base_dn} });
         my $self = {
 		host => $param->{host},	
 		ldap => $ldap, 
@@ -80,9 +80,9 @@ sub list_companies
         my $self = shift;
         my $param = shift;
         my $base = $self->{ou_users};
-	print STDERR __LINE__;;
-	print STDERR "==============";
-	return &_sorted(&_ou($self,$base));
+		print STDERR __LINE__;;
+		print STDERR "==============";
+		return &_sorted(&_ou($self,$base));
 }
 
 sub list_departments
@@ -90,13 +90,13 @@ sub list_departments
         my $self = shift;
         my $param = shift;
 
-	croak("Service::LDAP::list_departments Failed. No Company supplied for search") unless $param->{company};
+		croak("Service::LDAP::list_departments Failed. No Company supplied for search") unless $param->{company};
 	
-	my $company = "OU=".$param->{company};
+		my $company = "OU=".$param->{company};
         my $base = $company.",".$self->{ou_users};
-	my $Data = &_sorted(&_ou($self,$base));
+		my $Data = &_sorted(&_ou($self,$base));
 
-   	return &_sorted(&_ou($self,$base));
+   		return &_sorted(&_ou($self,$base));
 }
 
 sub list_groups
@@ -104,47 +104,47 @@ sub list_groups
         my $self = shift;
         my $param = shift;
         my $base = $self->{ou_groups};
-	my $filter = 'CN=*';
+		my $filter = 'CN=*';
 
-	my $Data = &_cn($self,$base,$filter);
-	return $Data;
+		my $Data = &_cn($self,$base,$filter);
+		return $Data;
 
 }
 
 sub get_groups
 {
-	my $self = shift;
+		my $self = shift;
         my $param = shift;
-	my $group = "OU=".$param->{group};
+		my $group = "OU=".$param->{group};
         print STDERR "group is $group\n";
-	my $base = $group.",".$self->{ou_groups};
+		my $base = $group.",".$self->{ou_groups};
         my $filter = "CN=".$param->{filter};
 
         croak("Service::LDAP::list_groups Failed. No Group supplied for search") unless $group;
-	croak("Service::LDAP::list_groups Failed. No Filter supplied for search") unless $filter;
+		croak("Service::LDAP::list_groups Failed. No Filter supplied for search") unless $filter;
 
-	my $Data = &_cn($self,$base,$filter);
+		my $Data = &_cn($self,$base,$filter);
         return $Data;
 }
 
 sub group_members
 {
-	my $self = shift;
-	my $param = shift;
-	my $group = $param->{group};
+		my $self = shift;
+		my $param = shift;
+		my $group = $param->{group};
         my $base = "OU=$group".",".$self->{ou_groups};
-	print STDERR "$base\n\n";
-	my $filter = "CN=".$param->{filter};
+		print STDERR "$base\n\n";
+		my $filter = "CN=".$param->{filter};
 
-	print STDERR $base;
-	#croak("Service::LDAP::group_members Failed. No Group supplied for search") unless $group;
-	croak("Service::LDAP::list_groups Failed. No Filter supplied for search") unless $filter;
+		print STDERR $base;
+		#croak("Service::LDAP::group_members Failed. No Group supplied for search") unless $group;
+		croak("Service::LDAP::list_groups Failed. No Filter supplied for search") unless $filter;
 
 
-	my $search = $self->{ldap}->search( base => $base, filter => $filter, scope => "subtree");
+		my $search = $self->{ldap}->search( base => $base, filter => $filter, scope => "subtree");
         my $DN;
 
-	my @members;
+		my @members;
         foreach my $entry ($search->entries) {
                 my $dn          = $entry->dn();
                 $dn             = uc($dn);
@@ -162,21 +162,21 @@ sub group_members
 	
 	my $Data;
 	foreach my $dn(@members){
-		my $filter = "distinguishedName=".$dn;
+			my $filter = "distinguishedName=".$dn;
 		
-		my $search = $self->{ldap}->search( base => $self->{base}, filter => $filter, scope => "subtree");
-		foreach my $entry (sort $search->entries) {
-			my $Val;
-			foreach my $attr( $entry->attributes){
-                	       if($attr eq "objectSid"){
-			       	       eval { $Val->{sid} = &_sid($entry->get_value("objectSid")); };
+			my $search = $self->{ldap}->search( base => $self->{base}, filter => $filter, scope => "subtree");
+			foreach my $entry (sort $search->entries) {
+					my $Val;
+					foreach my $attr( $entry->attributes){
+                			if($attr eq "objectSid"){
+			       	       			eval { $Val->{sid} = &_sid($entry->get_value("objectSid")); };
                         	}elsif($attr eq "objectGUID"){
                                 	eval { $Val->{gid} = &_sid($entry->get_value("objectGUID")); };
                         	}else{
                                		$Val->{$attr} = $entry->get_value($attr);
                         	}
                 	}
-                	$Data->{$Val->{sid}} = $Val;
+            $Data->{$Val->{sid}} = $Val;
         	}
 	}
 
@@ -207,7 +207,7 @@ sub user_get
         	my $Val;
                	foreach my $attr( $entry->attributes){
                 	if($attr eq "objectSid"){
-                        	eval { $Val->{sid} = &_sid($entry->get_value("objectSid")); };
+                        		eval { $Val->{sid} = &_sid($entry->get_value("objectSid")); };
                          }elsif($attr eq "objectGUID"){
                                  eval { $Val->{gid} = &_sid($entry->get_value("objectGUID")); };
                          }else{
@@ -226,15 +226,10 @@ sub user_create
 	my $self = shift;
 	my $param = shift;
 	my $base = $self->{ou_users};
-	#my $base = "OU=USER ACCOUNTS,DC=Affinity,DC=test";
 	my $validate = Affinity::Validate->new();
-	print STDERR "---------------------------------------------------------------------------------------\n";
-	print STDERR Dumper $param;
-	print STDERR "---------------------------------------------------------------------------------------\n";
 	my $fname = uc($validate->sanitise($param->{fname}));
 	my $lname = uc($validate->sanitise($param->{lname}));
 	my $fullname = $fname." ".$lname;
-	#my $zaid = $validate->zaid($param->{zaid});
 	my $zaid = $param->{zaid};
 	my $cell = $validate->phone_number($param->{cell});
 	my $mail = $param->{mail};
@@ -245,7 +240,6 @@ sub user_create
 		$mail = 0;
 	}
 	my $dep =  uc($param->{dep});
-	print STDERR "DEp is: $dep\n\n";
 	my $comp = uc($param->{comp});
 	my $dn;
 	if($dep eq "NULL"){
@@ -260,33 +254,32 @@ sub user_create
 	my $charmap = Unicode::Map8->new('latin1')  or  die;
 	my $pass = mkpasswd(-length => 12, -minnum => 3, -minlower => 4, -minupper => 4, -minspecial => 1 ,-noambiguous => 0);
 	my $newUniPW = $charmap->tou(qq/"$pass"/)->byteswap()->utf16();
-	print STDERR "Adding $dn with password $newUniPW\n\n";
 	croak("Service::LDAP::user_create Failed to initialise. Invalid First Name") unless $fname;
-        croak("Service::LDAP::user_create Failed to initialise. Invalid Last Name") unless $lname;
-        croak("Service::LDAP::user_create Failed to initialise. Invalid Cellphone Number") unless $cell;
-        croak("Service::LDAP::user_create Failed to initialise. Invalid Department") unless $dep;
+    croak("Service::LDAP::user_create Failed to initialise. Invalid Last Name") unless $lname;
+    croak("Service::LDAP::user_create Failed to initialise. Invalid Cellphone Number") unless $cell;
+    croak("Service::LDAP::user_create Failed to initialise. Invalid Department") unless $dep;
 	croak("Service::LDAP::user_create Failed to initialise. Invalid Company") unless $comp;
 
 	#croak("Not a valid South African ID Number") unless $zaid->{valid};
-       	#my $idnumber = $zaid->{zaid};
+    #my $idnumber = $zaid->{zaid};
 
 	my $add = $self->{ldap}->add(
             $dn,
             attr => [
                 'cn'          => $fullname,
                 'sn'          => $lname,
-		'employeeID'  => $zaid,
-		'mobile'      => $cell,
-		'mail'        => $mail,
-		'company'     => $comp,
-		'department'  => $dep,
-                'displayName' => $fullname,
-                'givenName'   => $fname,
-		'sAMAccountName' => $sam,
-		'unicodePwd' => $newUniPW,
-		'manager'	=> $manager,
-		'userPrincipalName' => $up,
-		'userAccountControl' => 66080,
+				'employeeID'  => $zaid,
+				'mobile'      => $cell,
+				'mail'        => $mail,
+				'company'     => $comp,
+				'department'  => $dep,
+        		'displayName' => $fullname,
+        		'givenName'   => $fname,
+				'sAMAccountName' => $sam,
+				'unicodePwd' => $newUniPW,
+				'manager'	=> $manager,
+				'userPrincipalName' => $up,
+				'userAccountControl' => 66080,
                 'objectclass' =>
                   [ "top", "person", "organizationalPerson", "user" ]
             ]
@@ -298,17 +291,17 @@ sub user_create
                 croak "Failed to add entry. ".$add->error;
         }else{
 
-		my $grp_add = $self->{ldap}->modify($memof,
+				my $grp_add = $self->{ldap}->modify($memof,
                         changes => [add => [member => $dn ] ]
-                );
+        		);
                 if($grp_add->error  ne "Success"){
                         croak("Service::LDAP::user_create Failed to add user to $memof");
                 }else{
 
                 }
 
- 		return({
-		cn          => $fullname,
+ 				return({
+				cn          => $fullname,
                 sn          => $lname,
                 employeeID  => $zaid,
                 mobile      => $cell,
@@ -320,8 +313,8 @@ sub user_create
                 sAMAccountName => $sam,
                 unicodePwd => $pass,
                 manager       => $manager,
-		parameters_sent => $param,
-		});
+				parameters_sent => $param,
+				});
         }
 
 
