@@ -1,0 +1,6 @@
+Revision history for Perl extension Service::LDAP.
+
+0.01  Thu Aug 19 12:56:38 2021
+	- original version; created by h2xs 1.23 with options
+		-AX Service::LDAP -b 5.0.10
+
