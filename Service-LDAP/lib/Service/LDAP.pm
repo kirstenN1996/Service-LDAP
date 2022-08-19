@@ -23,6 +23,7 @@ use Unicode::Map8;
 use Unicode::String qw(utf16);
 
 $VERSION = '2.02';
+#test123\
 
 sub new
 {
