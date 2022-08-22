@@ -23,7 +23,6 @@ use Unicode::Map8;
 use Unicode::String qw(utf16);
 
 $VERSION = '2.02';
-#test123\
 
 sub new
 {
@@ -34,7 +33,6 @@ sub new
         croak("Service::LDAP Failed to initialise. No Bind Password [bind_password] Specified") unless $param->{bind_password};
         croak("Service::LDAP Failed to initialise. No Base DN / RootDSE [base_dn] Specified") unless $param->{base_dn};
         croak("Service::LDAP Failed to initialise. No Host [host] Specified") unless $param->{host};
-	
 	
 		my $redis = $param->{redis};
 		my $dbh   = $param->{dbh},
