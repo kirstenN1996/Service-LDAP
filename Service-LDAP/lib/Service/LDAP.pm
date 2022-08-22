@@ -67,13 +67,13 @@ sub new
 
 sub _sorted
 {
-	my $hashref = shift;
-	my @sorted;
-	foreach my $key(sort keys %{$hashref}){
-		push(@sorted,$hashref->{$key});
-	}	
+		my $hashref = shift;
+		my @sorted;
+		foreach my $key(sort keys %{$hashref}){
+			push(@sorted,$hashref->{$key});
+		}	
        
-	return \@sorted;
+		return \@sorted;
 }
 
 sub list_companies
@@ -161,8 +161,8 @@ sub group_members
                 @members = $entry->get_value("member");
 	}
 	
-	my $Data;
-	foreach my $dn(@members){
+		my $Data;
+		foreach my $dn(@members){
 			my $filter = "distinguishedName=".$dn;
 		
 			my $search = $self->{ldap}->search( base => $self->{base}, filter => $filter, scope => "subtree");
@@ -187,25 +187,25 @@ sub group_members
 
 sub user_get
 {
-	my $self = shift;
-	my $param = shift;
-	my $base = $self->{ou_users};
-	my $clue = $param->{filter};
+		my $self = shift;
+		my $param = shift;
+		my $base = $self->{ou_users};
+		my $clue = $param->{filter};
 
-	croak("Service::LDAP::list_groups Failed. No Filter supplied for search") unless $clue;
+		croak("Service::LDAP::list_groups Failed. No Filter supplied for search") unless $clue;
 	
-	my $filter;
-	if($clue =~ /^CN=/i){ 
-		$filter = "distinguishedName=".$clue;
-	}elsif($clue =~ /^S\-/i){
-        	$filter = "objectSid=".$clue;
-	}else{
-		$filter = "sAMAccountName=".$clue;
-	}
-	my $search = $self->{ldap}->search( base => $self->{base}, filter => $filter, scope => "subtree");
-	my $Data;
+		my $filter;
+		if($clue =~ /^CN=/i){ 
+				$filter = "distinguishedName=".$clue;
+		}elsif($clue =~ /^S\-/i){
+        		$filter = "objectSid=".$clue;
+		}else{
+				$filter = "sAMAccountName=".$clue;
+		}
+		my $search = $self->{ldap}->search( base => $self->{base}, filter => $filter, scope => "subtree");
+		my $Data;
         foreach my $entry ($search->entries) {
-        	my $Val;
+        		my $Val;
                	foreach my $attr( $entry->attributes){
                 	if($attr eq "objectSid"){
                         		eval { $Val->{sid} = &_sid($entry->get_value("objectSid")); };
@@ -224,47 +224,47 @@ sub user_get
 
 sub user_create
 {
-	my $self = shift;
-	my $param = shift;
-	my $base = $self->{ou_users};
-	my $validate = Affinity::Validate->new();
-	my $fname = uc($validate->sanitise($param->{fname}));
-	my $lname = uc($validate->sanitise($param->{lname}));
-	my $fullname = $fname." ".$lname;
-	my $zaid = $param->{zaid};
-	my $cell = $validate->phone_number($param->{cell});
-	my $mail = $param->{mail};
-	my $memof = $param->{group};
-	if ($mail){
-		$mail = uc($validate->email($mail));
-	}else{
-		$mail = 0;
-	}
-	my $dep =  uc($param->{dep});
-	my $comp = uc($param->{comp});
-	my $dn;
-	if($dep eq "NULL"){
-	$dn = "CN=$fullname,OU=$comp,$base";
-	}else{
-	$dn = "CN=$fullname,OU=$dep,OU=$comp,$base";
-	};
-	my $sam = "$fname$lname";
-	my $up = $sam."@"."Affinity.Local";
-	my $manager = $param->{manager};
-	my $dn_manager = "CN=$manager,OU=$dep,OU=$comp,$base";
-	my $charmap = Unicode::Map8->new('latin1')  or  die;
-	my $pass = mkpasswd(-length => 12, -minnum => 3, -minlower => 4, -minupper => 4, -minspecial => 1 ,-noambiguous => 0);
-	my $newUniPW = $charmap->tou(qq/"$pass"/)->byteswap()->utf16();
-	croak("Service::LDAP::user_create Failed to initialise. Invalid First Name") unless $fname;
-    croak("Service::LDAP::user_create Failed to initialise. Invalid Last Name") unless $lname;
-    croak("Service::LDAP::user_create Failed to initialise. Invalid Cellphone Number") unless $cell;
-    croak("Service::LDAP::user_create Failed to initialise. Invalid Department") unless $dep;
-	croak("Service::LDAP::user_create Failed to initialise. Invalid Company") unless $comp;
+		my $self = shift;
+		my $param = shift;
+		my $base = $self->{ou_users};
+		my $validate = Affinity::Validate->new();
+		my $fname = uc($validate->sanitise($param->{fname}));
+		my $lname = uc($validate->sanitise($param->{lname}));
+		my $fullname = $fname." ".$lname;
+		my $zaid = $param->{zaid};
+		my $cell = $validate->phone_number($param->{cell});
+		my $mail = $param->{mail};
+		my $memof = $param->{group};
+		if ($mail){
+				$mail = uc($validate->email($mail));
+		}else{
+				$mail = 0;
+		}
+		my $dep =  uc($param->{dep});
+		my $comp = uc($param->{comp});
+		my $dn;
+		if($dep eq "NULL"){
+				$dn = "CN=$fullname,OU=$comp,$base";
+		}else{
+				$dn = "CN=$fullname,OU=$dep,OU=$comp,$base";
+		};
+		my $sam = "$fname$lname";
+		my $up = $sam."@"."Affinity.Local";
+		my $manager = $param->{manager};
+		my $dn_manager = "CN=$manager,OU=$dep,OU=$comp,$base";
+		my $charmap = Unicode::Map8->new('latin1')  or  die;
+		my $pass = mkpasswd(-length => 12, -minnum => 3, -minlower => 4, -minupper => 4, -minspecial => 1 ,-noambiguous => 0);
+		my $newUniPW = $charmap->tou(qq/"$pass"/)->byteswap()->utf16();
+		croak("Service::LDAP::user_create Failed to initialise. Invalid First Name") unless $fname;
+    	croak("Service::LDAP::user_create Failed to initialise. Invalid Last Name") unless $lname;
+    	croak("Service::LDAP::user_create Failed to initialise. Invalid Cellphone Number") unless $cell;
+    	croak("Service::LDAP::user_create Failed to initialise. Invalid Department") unless $dep;
+		croak("Service::LDAP::user_create Failed to initialise. Invalid Company") unless $comp;
 
-	#croak("Not a valid South African ID Number") unless $zaid->{valid};
-    #my $idnumber = $zaid->{zaid};
+		#croak("Not a valid South African ID Number") unless $zaid->{valid};
+    	#my $idnumber = $zaid->{zaid};
 
-	my $add = $self->{ldap}->add(
+		my $add = $self->{ldap}->add(
             $dn,
             attr => [
                 'cn'          => $fullname,
@@ -286,9 +286,9 @@ sub user_create
             ]
         );
 
-	#$add->code  and  warn "failed to add entry: ", $add->error;
-	#return $add;
-	if($add->error  ne "Success"){
+		#$add->code  and  warn "failed to add entry: ", $add->error;
+		#return $add;
+		if($add->error  ne "Success"){
                 croak "Failed to add entry. ".$add->error;
         }else{
 
@@ -323,30 +323,30 @@ sub user_create
 
 sub user_update
 {
-	my $self = shift;
+		my $self = shift;
         my $param = shift;
 	
-	my $dn = $param->{dn};
-	my $field = $param->{field};
-	my $value = $param->{value};
+		my $dn = $param->{dn};
+		my $field = $param->{field};
+		my $value = $param->{value};
 
         croak("Service::LDAP::user_update Failed. No DN supplied for update") unless $dn;
-	croak("Service::LDAP::user_update Failed. Invalid Field") unless $field;
-	croak("Service::LDAP::user_update Failed. Invalid Value") unless $value;
+		croak("Service::LDAP::user_update Failed. Invalid Field") unless $field;
+		croak("Service::LDAP::user_update Failed. Invalid Value") unless $value;
 
-	my $msg = $self->{ldap}->modify($dn, replace => { $field => $value } );
+		my $msg = $self->{ldap}->modify($dn, replace => { $field => $value } );
 	
-	if($msg->error  ne "Success"){
+		if($msg->error  ne "Success"){
                 croak "Update Failed. ".$msg->error;
         }else{
 		return $param;
-	}
+		}
 
 }
 
 sub search
 {
-	my $self = shift;
+		my $self = shift;
         my $param = shift;
         my $base = $self->{ou_users};
         my $client = $self->{redis};
@@ -355,14 +355,14 @@ sub search
         croak("Service::LDAP::search Failed. No Cellphone Number provided.") unless $param->{cell};
         croak("Service::LDAP::search Failed. No ID Number provided.") unless $param->{zaid};
 
-	my $cell = "mobile=".$param->{cell};
+		my $cell = "mobile=".$param->{cell};
         my $zaid = "employeeID=".$param->{zaid};
         my $Data;
         my $random = int( rand(1000)) + 9999;
         my $dn;
         my $zaidr = &_cn($self,$base,$zaid);
         my $cellr = &_cn($self,$base,$cell);
-	my $ad_zaid;
+		my $ad_zaid;
         my $ad_cell;
 
         foreach my $key(keys %{$zaidr}){
@@ -412,30 +412,30 @@ sub search
 
 sub forgot_pass
 {
-	my $self = shift;
-	my $param = shift;
-	my $base = $self->{ou_users};
-	my $client = $self->{redis};
-	$client->select(0);
-	croak("Service::LDAP::forgot_pass Failed. No DN provided.") unless $param->{dn};
-	my $dn = $param->{dn};
-	my $compare = $client->get($dn."-OTP");
-    croak("Invalid OTP") unless $compare;
-	my $otp	= $param->{otp};
-	my $cell = $param->{cell};
-	my $uname = $param->{username};
-	$cell =~ s/^0/27/;
-    croak("Service::LDAP::forgot_pass Failed. No OTP supplied") unless $otp;
-	croak("Service::LDAP::forgot_pass Failed. No cellphone number") unless $cell;
-	croak("Service::LDAP::forgot_pass Failed. No Username provided") unless $uname;
-	if($otp == $compare){
-			my $charmap = Unicode::Map8->new('latin1')  or  die;
-			my $pass = mkpasswd(-length => 12, -minnum => 3, -minlower => 4, -minupper => 4, -minspecial => 1, -noambiguous => 1);
-      		my $newUniPW = $charmap->tou(qq/"$pass"/)->byteswap()->utf16();
-            my $msg = $self->{ldap}->modify($dn, replace => {'unicodePwd' => $newUniPW } );
-            if($msg->error  ne "Success"){
+		my $self = shift;
+		my $param = shift;
+		my $base = $self->{ou_users};
+		my $client = $self->{redis};
+		$client->select(0);
+		croak("Service::LDAP::forgot_pass Failed. No DN provided.") unless $param->{dn};
+		my $dn = $param->{dn};
+		my $compare = $client->get($dn."-OTP");
+    	croak("Invalid OTP") unless $compare;
+		my $otp	= $param->{otp};
+		my $cell = $param->{cell};
+		my $uname = $param->{username};
+		$cell =~ s/^0/27/;
+    	croak("Service::LDAP::forgot_pass Failed. No OTP supplied") unless $otp;
+		croak("Service::LDAP::forgot_pass Failed. No cellphone number") unless $cell;
+		croak("Service::LDAP::forgot_pass Failed. No Username provided") unless $uname;
+		if($otp == $compare){
+				my $charmap = Unicode::Map8->new('latin1')  or  die;
+				my $pass = mkpasswd(-length => 12, -minnum => 3, -minlower => 4, -minupper => 4, -minspecial => 1, -noambiguous => 1);
+      			my $newUniPW = $charmap->tou(qq/"$pass"/)->byteswap()->utf16();
+            	my $msg = $self->{ldap}->modify($dn, replace => {'unicodePwd' => $newUniPW } );
+            	if($msg->error  ne "Success"){
             		croak ("Service::LDAP::forgot_pass Failed. ".$msg->error);
-            }else{
+            	}else{
 						my $url = "http://sms.connet-systems.com/submit/single?";
                        	my %sms;
 						#$sms{username} = 'affdev.intranet';
@@ -559,11 +559,11 @@ sub _ou
                 }
                 $OU->{$dn} = $Data;
         }
-	#if(!defined($OU)){
-	#	croak("Nothing Found.");
-	#}else{
+		#if(!defined($OU)){
+	#		croak("Nothing Found.");
+		#}else{
         	return $OU;
-	#}
+		#}
 }
 
 sub _cn
@@ -594,7 +594,7 @@ sub _cn
                 }
 			$CN->{$dn} = $Data;
         }
-	#if(!defined($CN)){
+		#if(!defined($CN)){
          #       croak("Nothing Found.");
         #}else{
          #       return $CN;
@@ -604,53 +604,53 @@ sub _cn
 
 sub _sid
 {
-	my ($sid) = @_;
-	my ($revision_level, $authority, $sub_authority_count,  @sub_authorities) = unpack 'C Vxx C V*', $sid;
-	return join '-', 'S', $revision_level, $authority,@sub_authorities;
+		my ($sid) = @_;
+		my ($revision_level, $authority, $sub_authority_count,  @sub_authorities) = unpack 'C Vxx C V*', $sid;
+		return join '-', 'S', $revision_level, $authority,@sub_authorities;
 }
 
 sub session_create
 {
-	my $self = shift;
-	my $param = shift;
-	my $username = $param->{username};
-	my $pass = $param->{password};
-	my $ip = $param->{ip};
-	my $base = $self->{base};
+		my $self = shift;
+		my $param = shift;
+		my $username = $param->{username};
+		my $pass = $param->{password};
+		my $ip = $param->{ip};
+		my $base = $self->{base};
         my $redis = $self->{redis};
 
-	print STDERR "password is $pass\n";
-	croak("Service::LDAP::session_create Failed. No username supplied") unless $username;
-    croak("Service::LDAP::session_create Failed. No password supplied") unless $pass;
+		print STDERR "password is $pass\n";
+		croak("Service::LDAP::session_create Failed. No username supplied") unless $username;
+    	croak("Service::LDAP::session_create Failed. No password supplied") unless $pass;
 
-	my $string = uuid();
+		my $string = uuid();
         		
 
-	$redis->select(1);
+		$redis->select(1);
 
-	my $user = "sAMAccountName=".$username;
-	my $user_base = $self->{ou_users};
-	my $search = $self->{ldap}->search( base => $user_base, filter => $user, scope => "subtree");
+		my $user = "sAMAccountName=".$username;
+		my $user_base = $self->{ou_users};
+		my $search = $self->{ldap}->search( base => $user_base, filter => $user, scope => "subtree");
 
-	my $Val;
-	my $dn;
-	foreach my $entry ($search->entries) {
-		$dn = $entry->dn();	
-		foreach my $attr( $entry->attributes){
-   			next if($attr =~ /;binary$/); 
-			if($attr eq "objectSid"){
+		my $Val;
+		my $dn;
+		foreach my $entry ($search->entries) {
+			$dn = $entry->dn();	
+			foreach my $attr( $entry->attributes){
+   				next if($attr =~ /;binary$/); 
+				if($attr eq "objectSid"){
                         	eval { $Val->{sid} = &_sid($entry->get_value("objectSid")); };
-               	         }elsif($attr eq "objectGUID"){
+            	}elsif($attr eq "objectGUID"){
                          	eval { $Val->{gid} = &_sid($entry->get_value("objectGUID")); };
-                         }else{
-				my @values = $entry->get_value($attr);
-                         	if($values[1]){
+                }else{
+						my @values = $entry->get_value($attr);
+                        if($values[1]){
                                 	$Val->{$attr} = \@values;
-                         	}else{
+                        }else{
                                  	$Val->{$attr} = $values[0];
-                         	}
-                               	#$Val->{$attr} = $entry->get_value($attr);
                         }
+                               	#$Val->{$attr} = $entry->get_value($attr);
+                }
 		}
 	}
 
@@ -721,47 +721,47 @@ sub session_delete
 
 sub _session_log
 {
-	my $self	= shift;
-	my $Val 	= shift;
-	my $session 	= shift;
-	my $ip		= shift;
-	my $param	= shift;
+		my $self	= shift;
+		my $Val 	= shift;
+		my $session 	= shift;
+		my $ip		= shift;
+		my $param	= shift;
 
-	my $name = $Val->{distinguishedName};
-	my $sid = $Val->{sid};
-	my $date = DateTime->now->strftime('%Y-%m-%d');   
-	my $sql = qq{insert into ad_sessions (session_key, DN, sid, date,IP_address) values("$session", "$name", "$sid", "$date","$ip")};
-	my $rep = $self->{dbh}->prepare($sql);
-	$rep->execute || croak("Could not log session");
-	$rep->finish;
+		my $name = $Val->{distinguishedName};
+		my $sid = $Val->{sid};
+		my $date = DateTime->now->strftime('%Y-%m-%d');   
+		my $sql = qq{insert into ad_sessions (session_key, DN, sid, date,IP_address) values("$session", "$name", "$sid", "$date","$ip")};
+		my $rep = $self->{dbh}->prepare($sql);
+		$rep->execute || croak("Could not log session");
+		$rep->finish;
 }
 
 sub session_store_set
 {
-	my $self = shift;
-	my $param = shift;
-	my $redis = $self->{redis};
-	my $session = $param->{session_key};
-	my $field = $param->{field};
-	my $value = $param->{value};
+		my $self = shift;
+		my $param = shift;
+		my $redis = $self->{redis};
+		my $session = $param->{session_key};
+		my $field = $param->{field};
+		my $value = $param->{value};
 
-	croak("Service::LDAP::session_store_set Failed. No session supplied") unless $session;
-	croak("Service::LDAP::session_store_set Failed. No field supplied") unless $field;
-	croak("Service::LDAP::session_store_set Failed. No value supplied") unless $value;
+		croak("Service::LDAP::session_store_set Failed. No session supplied") unless $session;
+		croak("Service::LDAP::session_store_set Failed. No field supplied") unless $field;
+		croak("Service::LDAP::session_store_set Failed. No value supplied") unless $value;
 	
-	$redis->select(1);
-	my $json_session_data = $redis->get($session);
+		$redis->select(1);
+		my $json_session_data = $redis->get($session);
 
-	if($json_session_data){
-		my $session_data = $self->{coder}->decode($json_session_data);
-		$session_data->{store}->{$field} = $value;
-		my $json = $self->{coder}->encode($session_data);
-		$redis->set($session,$json);
-		$redis->persist($session);
-		return $session_data;
-	}else{
-		croak("Service::LDAP::session_store_set Failed. Session does not exist");
-	};
+		if($json_session_data){
+			my $session_data = $self->{coder}->decode($json_session_data);
+			$session_data->{store}->{$field} = $value;
+			my $json = $self->{coder}->encode($session_data);
+			$redis->set($session,$json);
+			$redis->persist($session);
+			return $session_data;
+		}else{
+			croak("Service::LDAP::session_store_set Failed. Session does not exist");
+		};
 }
 
 sub session_store_get
@@ -775,12 +775,12 @@ sub session_store_get
         croak("Service::LDAP::session_store_get Failed. No session supplied") unless $session;
         croak("Service::LDAP::session_store_get Failed. No field supplied") unless $field;
 
-	$redis->select(1);
-	my $json_session_data = $redis->get($session);
+		$redis->select(1);
+		my $json_session_data = $redis->get($session);
         if($json_session_data){
         	my $session_data = $self->{coder}->decode($json_session_data);
-		my $store = $session_data->{store}->{$field};
-		return $store;
+			my $store = $session_data->{store}->{$field};
+			return $store;
         }else{
         	croak("Service::LDAP::session_store_get Failed. Session does not exist");
         };
